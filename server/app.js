@@ -56,7 +56,13 @@ app.use(async (ctx, next) => {
 
 app.use(koaStatic(yapi.path.join(yapi.WEBROOT, 'static'), { index: indexFile, gzip: true }));
 
-app.listen(yapi.WEBCONFIG.port);
+//Node.js 服务器连接2min超时限制，改为不限制
+const http = require('http');
+const server = http.createServer(app.callback());
+server.setTimeout(0);
+server.listen(yapi.WEBCONFIG.port);
+//app.listen(yapi.WEBCONFIG.port);
+
 commons.log(
   `服务已启动，请打开下面链接访问: \nhttp://127.0.0.1${
     yapi.WEBCONFIG.port == '80' ? '' : ':' + yapi.WEBCONFIG.port

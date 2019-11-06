@@ -33,6 +33,7 @@ const {
 } = require('common/postmanLib.js');
 const { handleParamsValue, json_parse, ArrayToObject } = require('common/utils.js');
 import CaseEnv from 'client/components/CaseEnv';
+import CaseEnv_new from 'client/components/CaseEnv_new';
 import Label from '../../../../components/Label/Label.js';
 
 const Option = Select.Option;
@@ -123,6 +124,7 @@ class InterfaceColContent extends Component {
       email: false,
       download: false,
       currColEnvObj: {},
+      ProtocolEnvObj: {},
       collapseKey: '1',
       commonSettingModalVisible: false,
       commonSetting: {
@@ -214,6 +216,13 @@ class InterfaceColContent extends Component {
 
     let currDomain = handleCurrDomain(envItem && envItem.env, case_env);
     let header = currDomain.header;
+    //start，增加通用配置的协议头
+    header = header.filter(item2 => item2.name !== "x-env");
+    if(this.state.ProtocolEnvObj[project_id]){
+      var Protocol_object = eval("(" + this.state.ProtocolEnvObj[project_id] + ")");
+      header.push(Protocol_object);
+    }
+    //end..
     header.forEach(item => {
       if (!checkNameIsExistInArray(item.name, req_header)) {
         // item.abled = true;
@@ -268,7 +277,7 @@ class InterfaceColContent extends Component {
         result;
       try {
         result = await this.handleTest(curitem);
-
+        console.log("curitem:",curitem.req_headers);
         if (result.code === 400) {
           status = 'error';
         } else if (result.code === 0) {
@@ -483,7 +492,8 @@ class InterfaceColContent extends Component {
     } else {
       this.setState({
         collapseKey: '1',
-        currColEnvObj: {}
+        currColEnvObj: {},
+        ProtocolEnvObj: {}
       });
     }
   };
@@ -545,13 +555,23 @@ class InterfaceColContent extends Component {
       ...this.state.currColEnvObj,
       [project_id]: envName
     };
-    this.setState({ currColEnvObj });
-   // this.handleColdata(this.props.currCaseList, envName, project_id);
-   this.handleColdata(this.props.currCaseList,currColEnvObj);
+    this.setState({currColEnvObj},() =>{
+      this.handleColdata(this.props.currCaseList,currColEnvObj);
+    });
+  };
+
+  ProtocolEnvChange = (Protocol, project_id) => {
+    let ProtocolEnvObj = {
+      ...this.state.ProtocolEnvObj,
+      [project_id]: Protocol
+    };
+    this.setState({ProtocolEnvObj},() =>{
+      this.handleColdata(this.props.currCaseList,this.state.currColEnvObj);
+    });
   };
 
   autoTests = () => {
-    this.setState({ autoVisible: true, currColEnvObj: {}, collapseKey: '' });
+    this.setState({ autoVisible: true, collapseKey: '1' });
   };
 
   handleAuto = () => {
@@ -560,8 +580,7 @@ class InterfaceColContent extends Component {
       email: false,
       download: false,
       mode: 'html',
-      currColEnvObj: {},
-      collapseKey: ''
+      collapseKey: '1'
     });
   };
 
@@ -1041,12 +1060,14 @@ class InterfaceColContent extends Component {
             </h2>
           </Col>
           <Col span={10}>
-            <CaseEnv
+            <CaseEnv_new
               envList={this.props.envList}
               currProjectEnvChange={this.currProjectEnvChange}
               envValue={this.state.currColEnvObj}
               collapseKey={this.state.collapseKey}
               changeClose={this.changeCollapseClose}
+              ProtocolEnvChange={this.ProtocolEnvChange}
+              envProtocol={this.state.ProtocolEnvObj}
             />
           </Col>
           <Col span={9}>

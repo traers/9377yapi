@@ -9,7 +9,8 @@ import {
   fetchInterfaceColList,
   fetchCaseList,
   setColData,
-  fetchCaseEnvList
+  fetchCaseEnvList,
+  fetchCaseProtocolsList
 } from '../../../../reducer/modules/interfaceCol';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { getToken, getEnv } from '../../../../reducer/modules/project';
@@ -65,6 +66,7 @@ function handleReport(json) {
       currProject: state.project.currProject,
       token: state.project.token,
       envList: state.interfaceCol.envList,
+      protocolsList: state.interfaceCol.protocolsList,
       curProjectRole: state.project.currProject.role,
       projectEnv: state.project.projectEnv,
       curUid: state.user.uid
@@ -76,7 +78,8 @@ function handleReport(json) {
     setColData,
     getToken,
     getEnv,
-    fetchCaseEnvList
+    fetchCaseEnvList,
+    fetchCaseProtocolsList
   }
 )
 @withRouter
@@ -102,6 +105,8 @@ class InterfaceColContent extends Component {
     projectEnv: PropTypes.object,
     fetchCaseEnvList: PropTypes.func,
     envList: PropTypes.array,
+    fetchCaseProtocolsList: PropTypes.func,
+    protocolsList: PropTypes.array,
     curUid: PropTypes.number
   };
 
@@ -124,7 +129,8 @@ class InterfaceColContent extends Component {
       email: false,
       download: false,
       currColEnvObj: {},
-      ProtocolEnvObj: {},
+      currColProtocolsObj: {},
+      Protocol_object:[],
       collapseKey: '1',
       commonSettingModalVisible: false,
       commonSetting: {
@@ -165,6 +171,7 @@ class InterfaceColContent extends Component {
 
     await this.props.fetchCaseList(newColId);
     await this.props.fetchCaseEnvList(newColId);
+    await this.props.fetchCaseProtocolsList(newColId);
     this.changeCollapseClose();
     this.handleColdata(this.props.currCaseList);
   }
@@ -213,16 +220,29 @@ class InterfaceColContent extends Component {
     let envItem = _.find(this.props.envList, item => {
       return item._id === project_id;
     });
+    
+    //清除缓存里增加的历史协议头
+    for(let m = 0; m < envItem.env.length; m++) {
+      for(let n = 0; n < envItem.env[m].header.length; n++) {
+        if(envItem.env[m].header[n] == this.state.Protocol_object) {
+          envItem.env[m].header.splice(n, 1);
+          break;
+        }
+      }
+    }
 
     let currDomain = handleCurrDomain(envItem && envItem.env, case_env);
     let header = currDomain.header;
-    //start，增加通用配置的协议头
-    header = header.filter(item2 => item2.name !== "x-env");
-    if(this.state.ProtocolEnvObj[project_id]){
-      var Protocol_object = eval("(" + this.state.ProtocolEnvObj[project_id] + ")");
+
+    //增加通用配置的协议头
+    //console.log("currDomain:",currDomain);
+    //console.log("this.state.Protocol_object:",this.state.Protocol_object);
+    if(this.state.currColProtocolsObj[project_id]){
+      let Protocol_object = eval("(" + this.state.currColProtocolsObj[project_id] + ")");
       header.push(Protocol_object);
+      this.setState({ Protocol_object: Protocol_object });
     }
-    //end..
+
     header.forEach(item => {
       if (!checkNameIsExistInArray(item.name, req_header)) {
         // item.abled = true;
@@ -233,6 +253,7 @@ class InterfaceColContent extends Component {
         req_header.push(item);
       }
     });
+    //console.log("header:",header);
     return req_header;
   };
 
@@ -493,7 +514,7 @@ class InterfaceColContent extends Component {
       this.setState({
         collapseKey: '1',
         currColEnvObj: {},
-        ProtocolEnvObj: {}
+        currColProtocolsObj: {}
       });
     }
   };
@@ -560,12 +581,12 @@ class InterfaceColContent extends Component {
     });
   };
 
-  ProtocolEnvChange = (Protocol, project_id) => {
-    let ProtocolEnvObj = {
-      ...this.state.ProtocolEnvObj,
-      [project_id]: Protocol
+  currProjectProtocolsChange = (protocolName, project_id) => {
+    let currColProtocolsObj = {
+      ...this.state.currColProtocolsObj,
+      [project_id]: protocolName
     };
-    this.setState({ProtocolEnvObj},() =>{
+    this.setState({currColProtocolsObj},() =>{
       this.handleColdata(this.props.currCaseList,this.state.currColEnvObj);
     });
   };
@@ -1066,8 +1087,9 @@ class InterfaceColContent extends Component {
               envValue={this.state.currColEnvObj}
               collapseKey={this.state.collapseKey}
               changeClose={this.changeCollapseClose}
-              ProtocolEnvChange={this.ProtocolEnvChange}
-              envProtocol={this.state.ProtocolEnvObj}
+              protocolsList={this.props.protocolsList}
+              currProjectProtocolsChange={this.currProjectProtocolsChange}
+              protocolsValue={this.state.currColProtocolsObj}
             />
           </Col>
           <Col span={9}>

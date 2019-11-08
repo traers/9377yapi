@@ -51,6 +51,7 @@ class projectController extends baseController {
     const icon = 'string';
     const color = 'string';
     const env = 'array';
+    const protocols = 'array';
 
     const cat = 'array';
     this.schemaMap = {
@@ -74,6 +75,7 @@ class projectController extends baseController {
         pre_script: desc,
         after_script: desc,
         env,
+        protocols,
         group_name,
         desc,
         color,
@@ -219,7 +221,8 @@ class projectController extends baseController {
       add_time: yapi.commons.time(),
       up_time: yapi.commons.time(),
       is_json5: false,
-      env: [{ name: 'local', domain: 'http://127.0.0.1' }]
+      env: [{ name: 'local', domain: 'http://127.0.0.1' }],
+      protocols: [{ name: 'default' }]
     };
 
     let result = await this.Model.save(data);
@@ -295,7 +298,8 @@ class projectController extends baseController {
         uid: this.getUid(),
         add_time: yapi.commons.time(),
         up_time: yapi.commons.time(),
-        env: params.env || [{ name: 'local', domain: 'http://127.0.0.1' }]
+        env: params.env || [{ name: 'local', domain: 'http://127.0.0.1' }],
+        protocols: params.protocols || [{ name: 'default' }]
       });
 
       delete data._id;
@@ -535,6 +539,9 @@ class projectController extends baseController {
     result.cat = cat;
     if (result.env.length === 0) {
       result.env.push({ name: 'local', domain: 'http://127.0.0.1' });
+    }
+    if (result.protocols.length === 0) {
+      result.protocols.push({ name: 'default' });
     }
     result.role = await this.getProjectRole(params.id, 'project');
 
@@ -889,6 +896,96 @@ class projectController extends baseController {
         typeid: id
       });
       ctx.body = yapi.commons.resReturn(result);
+    } catch (e) {
+      ctx.body = yapi.commons.resReturn(null, 402, e.message);
+    }
+  }
+
+
+  /**
+   * 编辑项目的通用协议配置
+   * @interface /project/up_protocols
+   * @method POST
+   * @category project
+   * @foldnumber 10
+   * @param {Number} id 项目id，不能为空
+   * @param {Array} [protocols] 协议头配置
+   * @param {String} [protocols[].name] 标题
+   * @param {String} [protocols[].header] header
+   * @returns {Object}
+   * @example
+   */
+  async upProtocols(ctx) {
+    try {
+      let id = ctx.request.body.id;
+      let params = ctx.request.body;
+      if (!id) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '项目id不能为空'));
+      }
+
+      if ((await this.checkAuth(id, 'project', 'edit')) !== true) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '没有权限'));
+      }
+
+      if (!params.protocols || !Array.isArray(params.protocols)) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, 'headers参数格式有误'));
+      }
+
+      let projectData = await this.Model.get(id);
+      let data = {
+        up_time: yapi.commons.time()
+      };
+
+      data.protocols = params.protocols;
+      let isRepeat = this.arrRepeat(data.protocols, 'name');
+      if (isRepeat) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '协议头标题重复'));
+      }
+      let result = await this.Model.up(id, data);
+      let username = this.getUsername();
+      yapi.commons.saveLog({
+        content: `<a href="/user/profile/${this.getUid()}">${username}</a> 更新了项目 <a href="/project/${id}/interface/api">${
+          projectData.name
+        }</a> 的协议头配置`,
+        type: 'project',
+        uid: this.getUid(),
+        username: username,
+        typeid: id
+      });
+      ctx.body = yapi.commons.resReturn(result);
+    } catch (e) {
+      ctx.body = yapi.commons.resReturn(null, 402, e.message);
+    }
+  }
+
+  /**
+   * 获取项目的通用协议配置
+   * @interface /project/get_protocols
+   * @method GET
+   * @category project
+   * @foldnumber 10
+   * @param {Number} id 项目id，不能为空
+
+   * @returns {Object}
+   * @example
+   */
+  async getProtocols(ctx) {
+    try {
+      // console.log(ctx.request.query.project_id)
+      let project_id = ctx.request.query.project_id;
+      // let params = ctx.request.body;
+      if (!project_id) {
+        return (ctx.body = yapi.commons.resReturn(null, 405, '项目id不能为空'));
+      }
+
+      // 去掉权限判断
+      // if ((await this.checkAuth(project_id, 'project', 'edit')) !== true) {
+      //   return (ctx.body = yapi.commons.resReturn(null, 405, '没有权限'));
+      // }
+
+      let protocols = await this.Model.getByProtocols(project_id);
+
+      ctx.body = yapi.commons.resReturn(protocols);
     } catch (e) {
       ctx.body = yapi.commons.resReturn(null, 402, e.message);
     }

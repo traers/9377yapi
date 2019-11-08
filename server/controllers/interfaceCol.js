@@ -194,6 +194,48 @@ class interfaceColController extends baseController {
     }
   }
 
+  /**
+   * 获取一个接口集下的所有的测试用例的协议头变量
+   * @interface /col/case_protocols_list
+   * @method GET
+   * @category col
+   * @foldnumber 10
+   * @param {String} col_id 接口集id
+   * @returns {Object}
+   * @example
+   */
+  async getCaseProtocolsList(ctx) {
+    try {
+      let id = ctx.query.col_id;
+      if (!id || id == 0) {
+        return (ctx.body = yapi.commons.resReturn(null, 407, 'col_id不能为空'));
+      }
+
+      let colData = await this.colModel.get(id);
+      let project = await this.projectModel.getBaseInfo(colData.project_id);
+      if (project.project_type === 'private') {
+        if ((await this.checkAuth(project._id, 'project', 'view')) !== true) {
+          return (ctx.body = yapi.commons.resReturn(null, 406, '没有权限'));
+        }
+      }
+
+      // 通过col_id 找到 caseList
+      let projectList = await this.caseModel.list(id, 'project_id');
+      // 对projectList 进行去重处理
+      projectList = this.unique(projectList, 'project_id');
+
+      // 遍历projectList 找到项目和protocols
+      let projectprotocolsList = [];
+      for (let i = 0; i < projectList.length; i++) {
+        let result = await this.projectModel.getBaseInfo(projectList[i], 'name  protocols');
+        projectprotocolsList.push(result);
+      }
+      ctx.body = yapi.commons.resReturn(projectprotocolsList);
+    } catch (e) {
+      ctx.body = yapi.commons.resReturn(null, 402, e.message);
+    }
+  }
+
   requestParamsToObj(arr) {
     if (!arr || !Array.isArray(arr) || arr.length === 0) {
       return {};

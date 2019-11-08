@@ -6,6 +6,7 @@ const FETCH_CASE_LIST = 'yapi/interfaceCol/FETCH_CASE_LIST';
 const SET_COL_DATA = 'yapi/interfaceCol/SET_COL_DATA';
 const FETCH_VARIABLE_PARAMS_LIST = 'yapi/interfaceCol/FETCH_VARIABLE_PARAMS_LIST';
 const FETCH_CASE_ENV_LIST = 'yapi/interfaceCol/FETCH_CASE_ENV_LIST';
+const FETCH_CASE_PROTOCOLS_LIST = 'yapi/interfaceCol/FETCH_CASE_PROTOCOLS_LIST';
 // Reducer
 const initialState = {
   interfaceColList: [
@@ -27,7 +28,8 @@ const initialState = {
   currCase: {},
   currCaseList: [],
   variableParamsList: [],
-  envList: []
+  envList: [],
+  protocolsList: []
 };
 
 export default (state = initialState, action) => {
@@ -69,6 +71,12 @@ export default (state = initialState, action) => {
         envList: action.payload.data.data
       };
     }
+    case FETCH_CASE_PROTOCOLS_LIST: {
+      return {
+        ...state,
+        protocolsList: action.payload.data.data
+      };
+    }
     default:
       return state;
   }
@@ -100,6 +108,15 @@ export function fetchCaseEnvList(col_id) {
   return {
     type: FETCH_CASE_ENV_LIST,
     payload: axios.get('/api/col/case_env_list', {
+      params: { col_id }
+    })
+  };
+}
+
+export function fetchCaseProtocolsList(col_id) {
+  return {
+    type: FETCH_CASE_PROTOCOLS_LIST,
+    payload: axios.get('/api/col/case_protocols_list', {
       params: { col_id }
     })
   };

@@ -202,6 +202,11 @@ let routerConfig = {
       method: 'get'
     },
     {
+      action: 'getProtocols',
+      path: 'get_protocols',
+      method: 'get'
+    },
+    {
       action: 'add',
       path: 'add',
       method: 'post'
@@ -259,6 +264,11 @@ let routerConfig = {
     {
       action: 'upEnv',
       path: 'up_env',
+      method: 'post'
+    },
+    {
+      action: 'upProtocols',
+      path: 'up_protocols',
       method: 'post'
     },
     {
@@ -497,6 +507,11 @@ let routerConfig = {
     {
       action: 'getCaseEnvList',
       path: 'case_env_list',
+      method: 'get'
+    },
+    {
+      action: 'getCaseProtocolsList',
+      path: 'case_protocols_list',
       method: 'get'
     }
   ],

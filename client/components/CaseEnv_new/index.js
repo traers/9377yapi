@@ -18,8 +18,9 @@ export default class CaseEnv extends React.Component {
     changeClose: PropTypes.func,
     collapseKey: PropTypes.any,
     envValue: PropTypes.object,
-    envProtocol: PropTypes.object,
-    ProtocolEnvChange: PropTypes.func
+    protocolsList: PropTypes.array,
+    protocolsValue: PropTypes.object,
+    currProjectProtocolsChange: PropTypes.func
   };
 
   callback = key => {
@@ -96,9 +97,9 @@ export default class CaseEnv extends React.Component {
             )}
           </div>
           <div className="case-env">
-            {this.props.envList.length > 0 && (
+            {this.props.protocolsList.length > 0 && (
               <div>
-                {this.props.envList.map(item => {
+                {this.props.protocolsList.map(item => {
                   return (
                     <Row
                       key={item._id}
@@ -117,22 +118,22 @@ export default class CaseEnv extends React.Component {
                           style={{
                             width: '100%'
                           }}
-                          value={this.props.envProtocol[item._id] || ''}
+                          value={this.props.protocolsValue[item._id] || ''}
                           defaultValue=""
-                          onChange={val => this.props.ProtocolEnvChange(val, item._id)}
+                          onChange={val => this.props.currProjectProtocolsChange(val, item._id)}
                         >
                           <Option key="default" value="">
                           默认配置
                           </Option>
-                          <Option key='x_env_qa' value='{name: "x-env", value: "qa"}'>
-                            {"测试环境" + ': ' + "x-env:qa"}
-                          </Option>
-                          <Option key='x_env_pre' value='{name: "x-env", value: "pre"}'>
-                            {"预发布环境" + ': ' + "x-env:pre"}
-                          </Option>
-                          <Option key='x_env_gray' value='{name: "x-env", value: "gray"}'>
-                            {"灰度环境" + ': ' + "x-env:gray"}
-                          </Option>
+                          
+                          {item.protocols.map(key => {
+                            var headerString = JSON.stringify(key.header[0]);
+                            return (
+                              <Option value={headerString} key={key._id}>
+                                {key.name + ' : [ ' + key.header[0].name+ ' : '+key.header[0].value+ ' ]'}
+                              </Option>
+                            );
+                          })}
                         </Select>
                       </Col>
                     </Row>

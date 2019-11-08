@@ -7,6 +7,7 @@ import ProjectRequest from './ProjectRequest/ProjectRequest';
 import ProjectToken from './ProjectToken/ProjectToken';
 import ProjectMock from './ProjectMock/index.js';
 import { connect } from 'react-redux';
+import ProjectProtocols from './ProjectProtocols/index.js';
 const TabPane = Tabs.TabPane;
 const plugin = require('client/plugin.js');
 
@@ -53,6 +54,9 @@ class Setting extends Component {
               <C projectId={+id} />
             </TabPane>
           })}
+          <TabPane tab="协议头配置" key="6">
+            <ProjectProtocols projectId={+id} />
+          </TabPane>
         </Tabs>
       </div>
     );

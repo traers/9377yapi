@@ -48,6 +48,7 @@ class projectModel extends baseModel {
         name: String,
         value: String
       }] }],
+      protocols: [{ name: String, header: Array }],
       icon: String,
       color: String,
       add_time: Number,
@@ -130,6 +131,15 @@ class projectModel extends baseModel {
       .exec().then(this.handleEnvNullData);
   }
 
+  getByProtocols(id) {
+    return this.model
+      .findOne({
+        _id: id
+      })
+      .select('protocols')
+      .exec().then(this.handleEnvNullData);
+  }
+
   getProjectWithAuth(group_id, uid) {
     return this.model.countDocuments({
       group_id: group_id,
@@ -140,7 +150,7 @@ class projectModel extends baseModel {
   getBaseInfo(id, select) {
     select =
       select ||
-      '_id uid name basepath switch_notice desc group_id project_type env icon color add_time up_time pre_script after_script project_mock_script is_mock_open strice is_json5 tag';
+      '_id uid name basepath switch_notice desc group_id project_type env icon color add_time up_time pre_script after_script project_mock_script is_mock_open strice is_json5 tag protocols';
     return this.model
       .findOne({
         _id: id

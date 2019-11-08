@@ -9,6 +9,7 @@ const PROJECT_DEL = 'yapi/project/PROJECT_DEL';
 // const CHANGE_TABLE_LOADING = 'yapi/project/CHANGE_TABLE_LOADING';
 const PROJECT_UPDATE = 'yapi/project/PROJECT_UPDATE';
 const PROJECT_UPDATE_ENV = 'yapi/project/PROJECT_UPDATE_ENV';
+const PROJECT_UPDATE_PROTOCOLS = 'yapi/project/PROJECT_UPDATE_PROTOCOLS';
 const PROJECT_UPSET = 'yapi/project/PROJECT_UPSET';
 const GET_CURR_PROJECT = 'yapi/project/GET_CURR_PROJECT';
 const GET_PEOJECT_MEMBER = 'yapi/project/GET_PEOJECT_MEMBER';
@@ -20,6 +21,7 @@ const UPDATE_TOKEN = 'yapi/project/UPDATE_TOKEN';
 const CHECK_PROJECT_NAME = 'yapi/project/CHECK_PROJECT_NAME';
 const COPY_PROJECT_MSG = 'yapi/project/COPY_PROJECT_MSG';
 const PROJECT_GET_ENV = 'yapi/project/PROJECT_GET_ENV';
+const PROJECT_GET_PROTOCOLS = 'yapi/project/PROJECT_GET_PROTOCOLS';
 const CHANGE_MEMBER_EMAIL_NOTICE = 'yapi/project/CHANGE_MEMBER_EMAIL_NOTICE';
 const GET_SWAGGER_URL_DATA = 'yapi/project/GET_SWAGGER_URL_DATA'
 // Reducer
@@ -36,6 +38,13 @@ const initialState = {
   currProject: {},
   projectEnv: {
     env: [
+      {
+        header: []
+      }
+    ]
+  },
+  projectProtocols: {
+    protocols: [
       {
         header: []
       }
@@ -82,6 +91,14 @@ export default (state = initialState, action) => {
         projectEnv: action.payload.data.data
       };
     }
+
+    case PROJECT_GET_PROTOCOLS: {
+      return {
+        ...state,
+        projectProtocols: action.payload.data.data
+      };
+    }
+
     case UPDATE_TOKEN: {
       return {
         ...state,
@@ -217,7 +234,7 @@ export function addProject(data) {
 
 // 修改项目
 export function updateProject(data) {
-  let { name, project_type, basepath, desc, _id, env, group_id, switch_notice, strice, is_json5, tag } = data;
+  let { name, project_type, basepath, desc, _id, env, group_id, switch_notice, strice, is_json5, tag ,protocols } = data;
   
   // 过滤项目名称中有html标签存在的情况
   name = htmlFilter(name);
@@ -232,7 +249,8 @@ export function updateProject(data) {
     group_id,
     strice,
     is_json5,
-    tag
+    tag,
+    protocols
   };
   return {
     type: PROJECT_UPDATE,
@@ -253,6 +271,27 @@ export function updateProjectMock(data) {
   return {
     type: PROJECT_UPDATE,
     payload: axios.post('/api/project/up', data)
+  };
+}
+
+// 修改全局协议头
+export function updateProtocols(data) {
+  const { protocols, _id } = data;
+  const param = {
+    id: _id,
+    protocols
+  };
+  return {
+    type: PROJECT_UPDATE_PROTOCOLS,
+    payload: axios.post('/api/project/up_protocols', param)
+  };
+}
+
+// 获取全局协议头
+export function getProtocols(project_id) {
+  return {
+    type: PROJECT_GET_PROTOCOLS,
+    payload: axios.get('/api/project/get_protocols', { params: { project_id } })
   };
 }
 

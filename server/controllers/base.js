@@ -29,7 +29,8 @@ class baseController {
       '/api/user/status',
       '/api/user/logout',
       '/api/user/avatar',
-      '/api/user/login_by_ldap'
+      '/api/user/login_by_ldap',
+      '/api/report/get_report'
     ];
     if (ignoreRouter.indexOf(ctx.path) > -1) {
       this.$auth = true;
@@ -40,13 +41,13 @@ class baseController {
     let openApiRouter = [
       '/api/open/run_auto_test',
       '/api/open/import_data',
-			'/api/interface/add',
-			'/api/interface/save',
-			'/api/interface/up',
-			'/api/interface/get',
-			'/api/interface/list',
-			'/api/interface/list_menu',
-			'/api/interface/add_cat',
+      '/api/interface/add',
+      '/api/interface/save',
+      '/api/interface/up',
+      '/api/interface/get',
+      '/api/interface/list',
+      '/api/interface/list_menu',
+      '/api/interface/add_cat',
       '/api/interface/getCatMenu',
       '/api/interface/list_cat',
       '/api/project/get',

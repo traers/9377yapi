@@ -126,7 +126,7 @@ function reponseHtml(res_header, res_body) {
     ? ` <div class="row case-report">
   <div class="col-3 case-report-title">Body</div>
   <div class="col-21">
-   <pre><xmp>${res_body}</xmp></pre>
+   <pre>${res_body}</pre>
   </div>
  </div>`
     : ``;

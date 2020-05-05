@@ -4,7 +4,7 @@
   "description": "YAPI",
   "main": "server/app.js",
   "scripts": {
-    "dev-copy-icon": "cp -r static/iconfont ./",
+    "dev-copy-icon": "echo d|xcopy static\\iconfont .\\iconfont /D/E/Y",
     "dev-server": " nodemon server/app.js dev -L",
     "install-server": " node server/install.js",
     "dev-client": "npm run dev-copy-icon && ykit s -p 4000",

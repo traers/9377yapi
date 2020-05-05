@@ -135,7 +135,7 @@ export default class Run extends Component {
       envModalVisible: false,
       test_res_header: null,
       test_res_body: null,
-      autoPreviewHTML: true,
+      autoPreviewHTML: false,
       ...this.props.data
     };
   }

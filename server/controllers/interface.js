@@ -239,7 +239,7 @@ class interfaceController extends baseController {
       });
     });
 
-    let checkRepeat = await this.Model.checkRepeat(params.project_id, params.path, params.method);
+    let checkRepeat = await this.Model.checkRepeat(params.project_id, params.path, params.method, params.title);
 
     if (checkRepeat > 0) {
       return (ctx.body = yapi.commons.resReturn(
@@ -688,7 +688,8 @@ class interfaceController extends baseController {
       let checkRepeat = await this.Model.checkRepeat(
         interfaceData.project_id,
         params.path,
-        params.method
+        params.method,
+        params.title
       );
       if (checkRepeat > 0) {
         return (ctx.body = yapi.commons.resReturn(

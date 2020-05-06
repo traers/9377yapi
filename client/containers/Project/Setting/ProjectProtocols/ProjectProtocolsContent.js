@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import './index.scss';
-import { Row, Col, Form, Input, Button, AutoComplete } from 'antd';
+import { Icon, Row, Col, Form, Input, Button, AutoComplete } from 'antd';
 const FormItem = Form.Item;
 import constants from 'client/constants/variable.js';
 
@@ -23,29 +23,45 @@ class ProjectProtocolsContent extends Component {
   };
 
   initState(curdata) {
+    let header = [
+      {
+        name: '',
+        value: ''
+      }
+    ];
     const curheader = curdata.header;
     if (curheader && curheader.length !== 0) {
-      let header = [];
       curheader.forEach(item => {
         header.unshift(item);
       });
-      return { header };
     }
-    else {
-      let header = [
-        {
-          name: '',
-          value: ''
-        }
-      ];
-      return { header };
-    }
+    return { header };
   }
 
   constructor(props) {
     super(props);
     this.state = Object.assign({}, initMap);
   }
+  addHeader = (value, index, name) => {
+    let nextHeader = this.state[name][index + 1];
+    if (nextHeader && typeof nextHeader === 'object') {
+      return;
+    }
+    let newValue = {};
+    let data = { name: '', value: '' };
+    newValue[name] = [].concat(this.state[name], data);
+    this.setState(newValue);
+  };
+
+  delHeader = (key, name) => {
+    let curValue = this.props.form.getFieldValue(name);
+    let newValue = {};
+    newValue[name] = curValue.filter((val, index) => {
+      return index !== key;
+    });
+    this.props.form.setFieldsValue(newValue);
+    this.setState(newValue);
+  };
 
   handleInit(data) {
     this.props.form.resetFields();
@@ -86,6 +102,7 @@ class ProjectProtocolsContent extends Component {
     const { projectMsg } = this.props;
     const { getFieldDecorator } = this.props.form;
     const headerTpl = (item, index) => {
+      const headerLength = this.state.header.length - 1;
       return (
         <Row gutter={2} key={index}>
           <Col span={10}>
@@ -99,6 +116,7 @@ class ProjectProtocolsContent extends Component {
                   allowClear={true}
                   dataSource={constants.HTTP_REQUEST_HEADER}
                   placeholder="请输入header名称"
+                  onChange={() => this.addHeader(item, index, 'header')}
                   filterOption={(inputValue, option) =>
                     option.props.children.toUpperCase().indexOf(inputValue.toUpperCase()) !== -1
                   }
@@ -113,6 +131,17 @@ class ProjectProtocolsContent extends Component {
                 initialValue: item.value || ''
               })(<Input placeholder="请输入参数内容" style={{ width: '90%', marginRight: 8 }} />)}
             </FormItem>
+          </Col>
+          <Col span={2} className={index === headerLength ? ' protocols-last-row' : null}>
+            {/* 新增的项中，只有最后一项没有有删除按钮 */}
+            <Icon
+              className="dynamic-delete-button delete"
+              type="delete"
+              onClick={e => {
+                e.stopPropagation();
+                this.delHeader(index, 'header');
+              }}
+            />
           </Col>
         </Row>
       );

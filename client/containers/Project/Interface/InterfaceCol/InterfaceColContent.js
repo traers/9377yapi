@@ -221,13 +221,16 @@ class InterfaceColContent extends Component {
     let envItem = _.find(this.props.envList, item => {
       return item._id === project_id;
     });
-    
+    let protocolsItem = _.find(this.props.protocolsList, item => {
+      return item._id === project_id;
+    });
+    //console.log("protocolItem:",protocolsItem);
     //清除缓存里增加的历史协议头
     for(let m = 0; m < envItem.env.length; m++) {
-      for(let n = 0; n < envItem.env[m].header.length; n++) {
-        if(envItem.env[m].header[n] == this.state.Protocol_object) {
-          envItem.env[m].header.splice(n, 1);
-          break;
+      for(let n = 0; n < this.state.Protocol_object.length; n++) {
+        let delnum=envItem.env[m].header.indexOf(this.state.Protocol_object[n]);
+        if(delnum!=-1) {
+          envItem.env[m].header.splice(delnum, 1);
         }
       }
     }
@@ -237,11 +240,22 @@ class InterfaceColContent extends Component {
 
     //增加通用配置的协议头
     //console.log("currDomain:",currDomain);
-    //console.log("this.state.Protocol_object:",this.state.Protocol_object);
     if(this.state.currColProtocolsObj[project_id]){
-      let Protocol_object = eval("(" + this.state.currColProtocolsObj[project_id] + ")");
-      header.push(Protocol_object);
-      this.setState({ Protocol_object: Protocol_object });
+      for(let m = 0; m < protocolsItem.protocols.length; m++) {
+        if(protocolsItem.protocols[m].name==this.state.currColProtocolsObj[project_id]){
+          let Protocol_object = [];
+          for(let n = 0; n < protocolsItem.protocols[m].header.length; n++) {
+            header.push(protocolsItem.protocols[m].header[n]);
+            Protocol_object.push(protocolsItem.protocols[m].header[n]);
+          }
+          this.setState({ 
+            Protocol_object: [
+              ...Protocol_object
+            ]
+          });
+          //console.log("header:",header);
+        }
+      }
     }
 
     header.forEach(item => {

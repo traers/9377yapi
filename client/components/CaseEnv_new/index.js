@@ -127,10 +127,19 @@ export default class CaseEnv extends React.Component {
                           </Option>
                           
                           {item.protocols.map(key => {
-                            var headerString = JSON.stringify(key.header[0]);
+                            var headerString= ""
+                            for (var i = 0; i < key.header.length; i++) {
+                              if (i < key.header.length-1) {
+                                headerString = headerString+key.header[i].name+ ' : '+key.header[i].value+" , ";
+                              }
+                              else{
+                                headerString = headerString+key.header[i].name+ ' : '+key.header[i].value;
+                              }
+                              
+                            }
                             return (
-                              <Option value={headerString} key={key._id}>
-                                {key.name + ' : [ ' + key.header[0].name+ ' : '+key.header[0].value+ ' ]'}
+                              <Option value={key.name} key={key._id}>
+                                {key.name + ' : [ ' + headerString+ ' ]'}
                               </Option>
                             );
                           })}

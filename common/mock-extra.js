@@ -86,10 +86,28 @@ function mock(mockJSON, context) {
           data = '';
         }
       });
-      return data;
+      if (str.indexOf('parseFloat(') === -1) {
+        return data;
+      } else {
+        if (num(data)) {
+          return parseFloat(data);
+        } else {
+          return data;
+        }
+      }
     }
     return str;
   }
+}
+
+//校验字符串是否只含有数字
+var num = function(str) {
+  var patrn = /^[0-9]{1,20}$/;
+  var bool = true;
+  if (!patrn.exec(str)) {
+      bool = false;
+  }
+  return bool;
 }
 
 module.exports = mock;

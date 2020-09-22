@@ -283,8 +283,8 @@ exports.verifyPath = path => {
 exports.sandbox = (sandbox, script) => {
   try {
     const vm = require('vm');
-    sandbox = sandbox || {};  
-    script = new vm.Script(script); 
+    sandbox = sandbox || {}; 
+    script = new vm.Script(script);
     const context = new vm.createContext(sandbox);  
     script.runInContext(context, {  
       timeout: 3000 
@@ -639,8 +639,63 @@ exports.handleMockScript = function (script, context) {
   context.resHeader = sandbox.resHeader;
   context.httpCode = sandbox.httpCode;
   context.delay = sandbox.delay;
-};
 
+  // 处理mock接口post转发
+  if (JSON.stringify(sandbox.mockJson).indexOf("forwarding") != -1) {
+    console.log("forwarding")
+    const http = require('http')
+    const data = JSON.stringify(sandbox.params)
+    const options = {
+      hostname: context.mockJson['host'],
+      port: 80,
+      path: context.mockJson['path'],
+      method: context.mockJson['method'],
+      headers: context.mockJson['header']
+    }
+    const req = http.request(options, res => {
+      //console.log(`STATUS: ${res.statusCode}`)
+      //console.log('HEADERS: ' + JSON.stringify(res.headers));
+      res.on('data', d => {
+        process.stdout.write(d)
+        context.mockJson = d
+        context.resHeader = res.headers
+        context.httpCode = res.statusCode;
+      })
+    })
+    req.on('error', error => {
+      console.error(error)
+    })
+    req.write(data)
+    req.end()
+  }
+};
+// 处理mock接口post转发---配置用法
+// if(params.type == "active"){
+//   mockJson = {
+//     "code": 1,
+//     "data": {
+//       "status": 0,
+//       "msg": "success",
+//       "data": [
+//         params['imei']
+//       ]
+//     },
+//     "msg": "成功"
+//   }
+//   }
+//   else{
+//   mockJson = {
+//     "code": "forwarding",
+//     "host": "api.omudiya.com",
+//     "path": "/api/gateway/AtXicjnoschJgiEtZmvfydSGuvidwIg-",
+//     "header": {
+//     "Api-Method":header['api-method'],
+//     "Content-Type":header['content-type'],
+//     "Api-Name":header['api-name']
+//     },
+//     "method":"POST",
+//   }
+//   }
 
 
 exports.createWebAPIRequest = function (ops) {
